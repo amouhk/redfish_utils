@@ -26,8 +26,22 @@ class AccessBMC:
         logging.basicConfig(filename=file, level=logging.DEBUG)
 
     def post_request(self, req, payload, header):
-        return self.session.post(req, data=json.dumps(payload), headers=header, verify=True,
-                                 auth=(self.username, self.password))
+        resp = ""
+        try:
+            resp = self.session.post(req, data=json.dumps(payload), headers=header, verify=True, auth=(self.username, self.password))
+            data = resp.json()
+            logging.info(data)
+            print(data["@Message.ExtendedInfo"][0]["Message"])
+        except KeyError:
+            logging.info(resp)
+            logging.exception(repr(traceback.extract_stack()))
+            print("Failed to completed request")
+            raise
+        except json.JSONDecodeError:
+            logging.info(resp)
+            logging.exception(repr(traceback.extract_stack()))
+            print("Failed to completed request")
+            raise
 
     def wait_mc_available(self):
         logging.info(self.__class__.__name__ + ":" + inspect.currentframe().f_code.co_name)

@@ -58,17 +58,36 @@ class BootOption(AccessBMC):
         print("\t{:12}: {}".format("ClearCMOS", self.clr_cmos))
         print("\t{:12}: {}".format("Persistant", self.persistant))
 
-    def post_request(self, req, payload, header):
-        return self.session.post(req, data=json.dumps(payload), headers=header, verify=True,
-                                 auth=(self.username, self.password))
-
     def apply_option(self):
         logging.info(self.__class__.__name__ + ":" + inspect.currentframe().f_code.co_name)
-        print(self.__class__.__name__ + ":" + inspect.currentframe().f_code.co_name)
+        # print(self.__class__.__name__ + ":" + inspect.currentframe().f_code.co_name)
         req_rst = "http://" + self.bmc_ip + ":8080/redfish/v1/Systems/Server/Actions/Oem/ComputerSystem.SetBootOption"
         header = {'content-type': 'application/json'}
         payload = {"Boot": {"BootSourceOverrideTarget": self.device, "instance ": self.instance,
                             "clearcmos": self.clr_cmos, "persistent": self.persistant}}
-        resp = self.post_request(req_rst, payload, header)
+        self.post_request(req_rst, payload, header)
 
-        pprint.pprint(resp.json())
+    def get_options(self):
+        logging.info(self.__class__.__name__ + ":" + inspect.currentframe().f_code.co_name)
+        resp = ""
+        try:
+            req_rst = "http://" + self.bmc_ip + ":8080/redfish/v1/Systems/Server"
+            resp = self.session.get(req_str, verify=False, auth=(self.username, self.password))
+            data = resp.json()
+            self.device = data["Boot"]
+            self.instance = ""
+            self.clr_cmos = ""
+            self.persistant = ""
+        except KeyError:
+            logging.info(resp)
+            logging.exception(repr(traceback.extract_stack()))
+            print("Failed to completed request")
+            raise
+        except json.JSONDecodeError:
+            logging.info(resp)
+            logging.exception(repr(traceback.extract_stack()))
+            print("Failed to completed request")
+            raise
+
+
+
