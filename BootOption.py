@@ -1,10 +1,9 @@
 import inspect
 import json
 import logging
-import pprint
 import requests
 
-from tools.mesca3.redfish_utils.AccessBMC import AccessBMC
+from AccessBMC import AccessBMC
 
 
 class BootOption(AccessBMC):
@@ -63,31 +62,27 @@ class BootOption(AccessBMC):
         # print(self.__class__.__name__ + ":" + inspect.currentframe().f_code.co_name)
         req_rst = "http://" + self.bmc_ip + ":8080/redfish/v1/Systems/Server/Actions/Oem/ComputerSystem.SetBootOption"
         header = {'content-type': 'application/json'}
-        payload = {"Boot": {"BootSourceOverrideTarget": self.device, "instance ": self.instance,
+        payload = {"Boot": {"BootSourceOverrideTarget": self.device, "instance": str(self.instance),
                             "clearcmos": self.clr_cmos, "persistent": self.persistant}}
         self.post_request(req_rst, payload, header)
 
     def get_options(self):
         logging.info(self.__class__.__name__ + ":" + inspect.currentframe().f_code.co_name)
-        resp = ""
-        try:
-            req_rst = "http://" + self.bmc_ip + ":8080/redfish/v1/Systems/Server"
-            resp = self.session.get(req_str, verify=False, auth=(self.username, self.password))
-            data = resp.json()
-            self.device = data["Boot"]
-            self.instance = ""
-            self.clr_cmos = ""
-            self.persistant = ""
-        except KeyError:
-            logging.info(resp)
-            logging.exception(repr(traceback.extract_stack()))
-            print("Failed to completed request")
-            raise
-        except json.JSONDecodeError:
-            logging.info(resp)
-            logging.exception(repr(traceback.extract_stack()))
-            print("Failed to completed request")
-            raise
-
-
-
+        print("TODO: Not yet implemented")
+        # resp = ""
+        # try:
+        #     req_rst = "http://" + self.bmc_ip + ":8080/redfish/v1/Systems/Server"
+        #     resp = self.session.get(req_rst, verify=False, auth=(self.username, self.password))
+        #     data = resp.json()
+        #     self.device = data["Boot"]["BootSourceOverrideTarget"]
+        #     self.instance = data["Boot"]["BootSourceOverrideTarget@Redfish.AllowableValues"]
+        #     self.clr_cmos = ""
+        #     self.persistant = ""
+        # except KeyError:
+        #     logging.info(resp)
+        #     print("Failed to completed request")
+        #     raise
+        # except json.JSONDecodeError:
+        #     logging.info(resp)
+        #     print("Failed to completed request")
+        #     raise

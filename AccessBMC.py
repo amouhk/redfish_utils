@@ -3,8 +3,10 @@ import json
 import logging
 import sys
 import time
-import requests
+import traceback
 
+import requests
+import ipaddress
 
 class AccessBMC:
     def __init__(self):
@@ -16,10 +18,20 @@ class AccessBMC:
         self.session.trust_env = False
         self.logging_file = ""
 
-    def create(self, bmc_ip, fw_name, usr, pwd):
+    def set_bmc_ip_address(self, a_bmc_ip):
+        logging.info(self.__class__.__name__ + ":" + inspect.currentframe().f_code.co_name)
+        try:
+            ipaddress.ip_address(a_bmc_ip)
+        except ValueError:
+            print("Error : {} is not an ip address".format(a_bmc_ip))
+            raise
+        else:
+            self.bmc_ip = a_bmc_ip
+
+    def create(self, bmc_ip, usr, pwd):
         self.password = pwd
         self.username = usr
-        self.bmc_ip = bmc_ip
+        self.set_bmc_ip_address(bmc_ip)
 
     def set_log(self, file):
         self.logging_file = file
